@@ -15,7 +15,7 @@ RUN apt-get install -y nodejs
 
 CMD [ "node" ]
 
-CMD [ "npm -v" ]
+CMD [ "npm install -g yarn" ]
 
 WORKDIR $GOPATH/src/tool-backend
 
@@ -23,8 +23,8 @@ ADD . $GOPATH/src/tool-backend
 
 RUN go get -d -v ./...
 
-RUN go build -o goweb
+RUN go build -o facemask
 
 EXPOSE 9091
 
-ENTRYPOINT  ["./goweb"]
+ENTRYPOINT  ["./facemask"]
