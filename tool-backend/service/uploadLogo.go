@@ -493,7 +493,7 @@ func Test(c *gin.Context) {
 		if string(message) == "build" {
             fmt.Printf("string: %s\n", "build start")
 
-            cmd := exec.Command("/bin/bash", command)
+            cmd := exec.Command("/bin/sh", command)
         
             stdout, _ := cmd.StdoutPipe()
             stderr, _ := cmd.StderrPipe()
