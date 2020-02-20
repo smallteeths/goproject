@@ -490,6 +490,10 @@ func Test(c *gin.Context) {
         
         fmt.Printf("string: %s\n", string(message))
 
+        if string(message) == "check" {
+            ws.WriteMessage(mt, []byte("Ws Ok"))
+        }
+
 		if string(message) == "build" {
             fmt.Printf("string: %s\n", "build start")
 
