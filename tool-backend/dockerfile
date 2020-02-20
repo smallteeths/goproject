@@ -4,8 +4,8 @@ MAINTAINER Razil "503630985@qq.com"
 
 RUN apt-get update -y && \
     apt-get install -y curl \
-                       libcurl3 \
-                       libcurl3-dev \
+                       libcur14 \
+                       sudo \
                        ngrep \
                        gnupg
 
@@ -15,7 +15,9 @@ RUN apt-get install -y nodejs
 
 CMD [ "node" ]
 
-CMD [ "npm install -g yarn" ]
+RUN curl -o- -L https://yarnpkg.com/install.sh | bash
+
+RUN $HOME/.yarn/bin/yarn install
 
 WORKDIR $GOPATH/src/tool-backend
 
@@ -27,4 +29,4 @@ RUN go build -o facemask
 
 EXPOSE 9091
 
-ENTRYPOINT  ["./facemask"]
+ENTRYPOINT  ["sudo ./facemask"]
