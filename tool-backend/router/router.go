@@ -42,6 +42,8 @@ func InitRouter(g *gin.Engine) {
 
 		router.GET("/DeleteDir", service.DeleteDir)
 
+		router.GET("/isDone", service.IsExist)
+
 		// router.StaticFS("/public", http.Dir("static/uploadfile/"))
 
 		router.StaticFS("/public", http.Dir("./"))

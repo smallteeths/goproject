@@ -441,6 +441,8 @@ func Test(c *gin.Context) {
 
     var version string
 
+    os.Remove("static/rancherfile/buildflag");
+
     dir, _ := ioutil.ReadDir(viper.GetString("pandariaui"))
 
     dir2, _ := ioutil.ReadDir(viper.GetString("rancherui"))
@@ -514,7 +516,7 @@ func Test(c *gin.Context) {
                 break
             }
             
-            ws.WriteMessage(mt, []byte("Done build"))
+            ioutil.WriteFile("static/rancherfile/buildflag", []byte("build done"), 0655)
 		}
 	}
 
@@ -636,4 +638,28 @@ func NpmInstall(c *gin.Context) {
 
 func IndexPage(c *gin.Context)  {
 	c.HTML(http.StatusOK, "dist/index.html", gin.H{})
+}
+
+func IsExist(c *gin.Context) {
+    _,err := os.Stat("static/rancherfile/buildflag")
+
+    type Message struct {
+        Message 	string `json:"message"`
+    }
+
+    var u Message
+
+    if err != nil{
+        if os.IsExist(err) {  
+            u.Message = "done"
+            SendResponse(c, nil, u)
+        } else {
+            u.Message = "building"
+            SendResponse(c, nil, u)
+        }
+    } else {
+        u.Message = "done"
+        SendResponse(c, nil, u)
+    }
+
 }
