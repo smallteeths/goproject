@@ -478,6 +478,8 @@ func Test(c *gin.Context) {
     if err != nil {
 		SendResponse(c, errno.ErrBind, nil)
     }
+    
+    defer ws.Close()
 
     for {
 		//读取ws中的数据
@@ -510,7 +512,6 @@ func Test(c *gin.Context) {
             }
             
             ws.WriteMessage(mt, []byte("Done build"))
-
 		}
 	}
 
