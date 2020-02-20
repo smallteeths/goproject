@@ -3,6 +3,7 @@ package main
 import (
 	"tool-backend/config"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/static"
 	"log"
 	"tool-backend/router"
 	"github.com/spf13/viper"
@@ -23,6 +24,9 @@ func main() {
 	g := gin.New()
 
 	router.InitRouter(g)
+
+	g.Use(static.Serve("/", static.LocalFile("./dist/", false)))
+
 	log.Printf("Start to listening the incoming requests on http address: %s\n", viper.GetString("addr"))
 	//log.Println(http.ListenAndServe(viper.GetString("addr"), g).Error())
 	// if err := g.Run(viper.GetString("addr"));err != nil {log.Fatal("ListenAndServe:", err)}

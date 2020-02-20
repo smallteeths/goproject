@@ -19,7 +19,7 @@ RUN curl -o- -L https://yarnpkg.com/install.sh | bash
 
 RUN $HOME/.yarn/bin/yarn install
 
-CMD [ "npm" "install" "-g" "yarn"]
+RUN npm install yarn -g
 
 WORKDIR $GOPATH/src/tool-backend
 
@@ -31,4 +31,4 @@ RUN go build -o facemask
 
 EXPOSE 9091
 
-ENTRYPOINT  ["sudo" "./facemask"]
+ENTRYPOINT  ["sudo", "./facemask"]

@@ -630,3 +630,7 @@ func NpmInstall(c *gin.Context) {
 	}
 
 }
+
+func IndexPage(c *gin.Context)  {
+	c.HTML(http.StatusOK, "dist/index.html", gin.H{})
+}
