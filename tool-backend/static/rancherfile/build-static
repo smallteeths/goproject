@@ -172,4 +172,4 @@ runCmd find ${BUILD_DIR} -name '.DS_Store' -exec rm {} \;
 runCmd tar -czf ${BUILD_TGZ} -C ${BUILD_PAR} ${VERSION}
 
 # Upload asset, either from laptop or from CI pipeline
-exit 0
+echo "Done build"
