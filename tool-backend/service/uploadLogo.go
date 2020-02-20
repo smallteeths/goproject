@@ -533,7 +533,6 @@ func asyncLog(reader io.ReadCloser,mt int, ws *websocket.Conn) error {
 			s := strings.Split(string(b), "\n")
 			line := strings.Join(s[:len(s)-1], "\n") 
             fmt.Printf("%s%s\n", cache, line)
-            err = ws.WriteMessage(mt, []byte(line))
 			cache = s[len(s)-1]
 		}
     }
