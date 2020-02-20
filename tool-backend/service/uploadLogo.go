@@ -21,6 +21,7 @@ import (
     "net/http"
     "github.com/gorilla/websocket"
     "encoding/gob"
+    "time"
 )
 var upGrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -481,6 +482,8 @@ func Test(c *gin.Context) {
     
     defer ws.Close()
 
+    ws.SetReadDeadline(time.Now().Add(time.Duration(200)*time.Second))
+
     for {
 		//读取ws中的数据
 		mt, message, err := ws.ReadMessage()
@@ -489,10 +492,6 @@ func Test(c *gin.Context) {
         }
         
         fmt.Printf("string: %s\n", string(message))
-
-        if string(message) == "check" {
-            ws.WriteMessage(mt, []byte("Ws Ok"))
-        }
 
 		if string(message) == "build" {
             fmt.Printf("string: %s\n", "build start")
