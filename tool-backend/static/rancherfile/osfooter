@@ -3,7 +3,7 @@
 </a>
 
 {{#if settings.isRancher}}
-  <a style="color: #fff" role="button" class="btn btn-sm bg-transparent" target="blank" rel="noreferrer noopener" href="http://www.baidu.com">baidu</a><a style="color: #fff" role="button" class="btn btn-sm bg-transparent" target="blank" rel="noreferrer noopener" href="http://www.baidu.com">baidu3</a>
+  rancher-tool-wsy-link
   {{#if projectId}}
     <a href="{{href-to "authenticated.project.help" projectId}}" role="button" class="btn btn-sm bg-transparent">
       {{t "pageFooter.help"}}

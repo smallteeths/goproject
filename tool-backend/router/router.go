@@ -36,6 +36,12 @@ func InitRouter(g *gin.Engine) {
 
 		router.GET("/test", service.Test)
 
+		router.GET("/NpmInstall", service.NpmInstall)
+
+		router.GET("/isRancheruiExist", service.IsRancheruiExist)
+
+		router.GET("/DeleteDir", service.DeleteDir)
+
 		// router.StaticFS("/public", http.Dir("static/uploadfile/"))
 
 		router.StaticFS("/public", http.Dir("./"))

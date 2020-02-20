@@ -99,6 +99,22 @@ func UploadBackgroundHandler(c *gin.Context) {
 }
 
 func Save(c *gin.Context) {
+
+    var version string
+
+    dir, _ := ioutil.ReadDir(viper.GetString("pandariaui"))
+
+    dir2, _ := ioutil.ReadDir(viper.GetString("rancherui"))
+
+    if len(dir) == 0 && len(dir2) == 0 {
+        version = "empty"
+        SendResponse(c, errno.ErrBind, nil)
+    } else if len(dir) != 0 {
+        version = "pandarid"
+    } else if len(dir2) != 0 {
+        version = "rancherui"
+    }
+
     var r model.TemplateVariable
     
 	if err := c.Bind(&r); err != nil {
@@ -115,7 +131,7 @@ func Save(c *gin.Context) {
     }
 
     if r.LinkData != "" {
-        ChangeFooterFile(c, r.LinkData)
+        ChangeFooterFile(c, r.LinkData, version)
         info, err := ioutil.ReadFile("static/rancherfile/footer.hbs")
 
         if err != nil {
@@ -125,15 +141,19 @@ func Save(c *gin.Context) {
         }
         
         out := []byte(info)
-        ioutil.WriteFile(viper.GetString("rancherfooteraddr"), out, 0655)
+        if version == "rancherui" {
+            ioutil.WriteFile(viper.GetString("osrancherfooteraddr"), out, 0655)
+        } else {
+            ioutil.WriteFile(viper.GetString("rancherfooteraddr"), out, 0655)
+        }
     }
 
     if r.VariablesData != "" {
-        ChangeTheme(c, r.VariablesData)
+        ChangeTheme(c, r.VariablesData, version)
     }
 
     if r.LoginrecordData != "" {
-        ChangeLoginRecord(c, r.LoginrecordData)
+        ChangeLoginRecord(c, r.LoginrecordData, version)
     }
 
     if r.FileName != "" {
@@ -146,7 +166,12 @@ func Save(c *gin.Context) {
         }
         
         out := []byte(info)
-        ioutil.WriteFile(viper.GetString("logoaddr"), out, 0655)
+        if version == "rancherui" {
+            ioutil.WriteFile(viper.GetString("oslogoaddr"), out, 0655)
+        } else {
+            ioutil.WriteFile(viper.GetString("logoaddr"), out, 0655)
+        }
+        
     }
 
     if r.LoginBgFileName != "" {
@@ -159,7 +184,11 @@ func Save(c *gin.Context) {
         }
         
         out := []byte(info)
-        ioutil.WriteFile(viper.GetString("loginbgaddr"), out, 0655)
+        if version == "rancherui" {
+            ioutil.WriteFile(viper.GetString("osloginbgaddr"), out, 0655)
+        } else {
+            ioutil.WriteFile(viper.GetString("loginbgaddr"), out, 0655)
+        }
     }
 
     file, err := os.Create(viper.GetString("savefileaddr"))
@@ -178,7 +207,7 @@ func Save(c *gin.Context) {
     SendResponse(c, nil, nil)
 }
  
-func ChangeFooterFile(c *gin.Context, list string) {
+func ChangeFooterFile(c *gin.Context, list string, version string) {
 
     fmt.Printf("string: %s\n", list)
     
@@ -218,19 +247,27 @@ func ChangeFooterFile(c *gin.Context, list string) {
 
     fmt.Printf(concats)
 
-	in, err := os.Open(viper.GetString("footerfileaddr"))
+    var staticFooterName string
+
+    if version == "rancherui" {
+        staticFooterName = viper.GetString("osfooterfileaddr")
+    } else {
+        staticFooterName = viper.GetString("footerfileaddr")
+    }
+
+	in, err := os.Open(staticFooterName)
 	if err != nil {
 		fmt.Println("open file fail:", err)
 		os.Exit(-1)
 	}
 	defer in.Close()
  
-    del := os.Remove(viper.GetString("footerfileaddr")+".hbs");
+    del := os.Remove("static/rancherfile/footer.hbs");
     if del != nil {
         fmt.Println(del);
     }
 
-	out, err := os.OpenFile(viper.GetString("footerfileaddr")+".hbs", os.O_RDWR|os.O_CREATE, 0766)
+	out, err := os.OpenFile("static/rancherfile/footer.hbs", os.O_RDWR|os.O_CREATE, 0766)
 	if err != nil {
 		fmt.Println("Open write file fail:", err)
 		os.Exit(-1)
@@ -258,7 +295,7 @@ func ChangeFooterFile(c *gin.Context, list string) {
 	fmt.Println("FINISH!")
 }
 
-func ChangeTheme(c *gin.Context, themeString string) {
+func ChangeTheme(c *gin.Context, themeString string, version string) {
 
     var themeColor model.ThemeColor
 
@@ -294,13 +331,19 @@ func ChangeTheme(c *gin.Context, themeString string) {
         return
     }
 
-    name := viper.GetString("rancherthemeaddr")
+    var name string
+    
+    if version == "rancherui" {
+        name = viper.GetString("osrancherthemeaddr")
+    } else {
+        name = viper.GetString("rancherthemeaddr")
+    }
 
     ioutil.WriteFile(name, []byte(buf.String()), 0655)
 
 }
 
-func ChangeLoginRecord(c *gin.Context, LoginrecordString string) {
+func ChangeLoginRecord(c *gin.Context, LoginrecordString string, version string) {
 
     var loginrecordData model.LoginrecordData
 
@@ -361,7 +404,13 @@ func ChangeLoginRecord(c *gin.Context, LoginrecordString string) {
         return
     }
 
-    name := viper.GetString("rancherloginfileaddr")
+    var name string
+
+    if version == "rancherui" {
+        name = viper.GetString("osrancherloginfileaddr")
+    } else {
+        name = viper.GetString("rancherloginfileaddr")
+    }
 
     ioutil.WriteFile(name, []byte(bufRead.String()), 0655)
 
@@ -389,6 +438,41 @@ func SelectTemplateVariable(c *gin.Context)  {
 
 func Test(c *gin.Context) {
 
+    var version string
+
+    dir, _ := ioutil.ReadDir(viper.GetString("pandariaui"))
+
+    dir2, _ := ioutil.ReadDir(viper.GetString("rancherui"))
+
+    if len(dir) == 0 && len(dir2) == 0 {
+        version = "empty"
+        SendResponse(c, errno.ErrBind, nil)
+    } else if len(dir) != 0 {
+        version = "pandarid"
+    } else if len(dir2) != 0 {
+        version = "rancherui"
+    }
+
+    info, errcmd := ioutil.ReadFile(viper.GetString("staticbuildfile"))
+
+    if errcmd != nil {
+        fmt.Println(errcmd)
+        SendResponse(c, errno.ErrBind, nil)
+        return
+    }
+    
+    out := []byte(info)
+
+    var command string
+
+    if version == "rancherui" {
+        command = viper.GetString("osbuildfile")        
+    } else {
+        command = viper.GetString("buildfile")
+    }
+
+    ioutil.WriteFile(command, out, 0655)
+
     ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 
     if err != nil {
@@ -408,8 +492,6 @@ func Test(c *gin.Context) {
 
 		if string(message) == "build" {
             fmt.Printf("string: %s\n", "build start")
-    
-            command := viper.GetString("buildfile")
 
             cmd := exec.Command("/bin/sh", command)
         
@@ -457,4 +539,94 @@ func asyncLog(reader io.ReadCloser,mt int, ws *websocket.Conn) error {
     }
 
 	return nil
+}
+
+func IsRancheruiExist(c *gin.Context) {
+
+    type Message struct {
+        Message 	string `json:"message"`
+    }
+
+    var u Message
+
+    dir, _ := ioutil.ReadDir(viper.GetString("pandariaui"))
+
+    dir2, _ := ioutil.ReadDir(viper.GetString("rancherui"))
+
+    if len(dir) == 0 && len(dir2) == 0 {
+        u.Message = "empty"
+        SendResponse(c, nil, u)
+    } else if len(dir) != 0 {
+        u.Message = "pandarid"
+        SendResponse(c, nil, u)
+    } else if len(dir2) != 0 {
+        u.Message = "rancherui"
+        SendResponse(c, nil, u)
+    }
+}
+
+func DeleteDir(c *gin.Context) {
+
+    err := os.RemoveAll(viper.GetString("pandariaui"))
+
+    if err != nil {
+        SendResponse(c, errno.ErrBind, nil)
+    }
+
+    err2 := os.RemoveAll(viper.GetString("rancherui"))
+
+    if err2 != nil {
+        SendResponse(c, errno.ErrBind, nil)
+    }
+
+    SendResponse(c, nil, nil)
+}
+
+func NpmInstall(c *gin.Context) {
+
+    ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+
+    if err != nil {
+		SendResponse(c, errno.ErrBind, nil)
+    }
+    
+    defer ws.Close()
+
+    for {
+		//读取ws中的数据
+		mt, message, err := ws.ReadMessage()
+		if err != nil {
+			break
+        }
+
+        fmt.Printf("string: %s\n", "install start")
+
+        if string(message) == "osinstallfile" || string(message) == "installfile" {
+
+            command := viper.GetString(string(message))
+
+            cmd := exec.Command("/bin/sh", command)
+        
+            stdout, _ := cmd.StdoutPipe()
+            stderr, _ := cmd.StderrPipe()
+        
+            if err := cmd.Start(); err != nil {
+                log.Printf("Error starting command: %s......", err.Error())
+            }
+        
+            asyncLog(stdout, mt, ws)
+            asyncLog(stderr, mt, ws)
+        
+            if err := cmd.Wait(); err != nil {
+                log.Printf("Error waiting for command execution: %s......", err.Error())
+                ws.WriteMessage(mt, []byte("Failed build"))
+                break
+            }
+            
+            ws.WriteMessage(mt, []byte("Done install"))
+
+        }
+
+	}
+
 }
