@@ -493,7 +493,7 @@ func Test(c *gin.Context) {
 		if string(message) == "build" {
             fmt.Printf("string: %s\n", "build start")
 
-            cmd := exec.Command("/bin/sh", command)
+            cmd := exec.Command("/bin/bash", command)
         
             stdout, _ := cmd.StdoutPipe()
             stderr, _ := cmd.StderrPipe()
@@ -519,7 +519,7 @@ func Test(c *gin.Context) {
 
 func asyncLog(reader io.ReadCloser,mt int, ws *websocket.Conn) error {
 	cache := ""
-	buf := make([]byte, 1024)
+	buf := make([]byte, 10240)
 	for {
 		num, err := reader.Read(buf)
 		if err != nil && err!=io.EOF{
