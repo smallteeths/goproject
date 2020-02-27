@@ -31,4 +31,6 @@ RUN go build -o facemask
 
 EXPOSE 9091
 
+EXPOSE 8000
+
 ENTRYPOINT  ["sudo", "./facemask"]

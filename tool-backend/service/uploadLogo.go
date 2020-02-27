@@ -22,6 +22,8 @@ import (
     "github.com/gorilla/websocket"
     "encoding/gob"
     "time"
+    "context"
+    "syscall"
 )
 var upGrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -662,4 +664,130 @@ func IsExist(c *gin.Context) {
         SendResponse(c, nil, u)
     }
 
+}
+
+func StartDebugger(c *gin.Context) {
+
+    dir, _ := ioutil.ReadDir(viper.GetString("pandariaui"))
+
+    dir2, _ := ioutil.ReadDir(viper.GetString("rancherui"))
+
+    ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+
+    if err != nil {
+		SendResponse(c, errno.ErrBind, nil)
+    }
+    
+    defer ws.Close()
+
+    ctx, cancel := context.WithCancel(context.Background())
+
+    for {
+		//读取ws中的数据
+		mt, message, err := ws.ReadMessage()
+		if err != nil {
+			break
+        }
+        
+        fmt.Printf("string: %s\n", string(message))
+
+		if string(message) != "stop" && string(message) != "heartbeat" {
+
+            if len(dir) == 0 && len(dir2) == 0 {
+                ws.WriteMessage(mt, []byte("文件未上传"))
+            } else if len(dir) != 0 {
+                go RancherServerStart(string(message), viper.GetString("pandariaui"), ctx)
+
+                ws.WriteMessage(mt, []byte("调试已经开启"))
+            } else if len(dir2) != 0 {
+
+                go RancherServerStart(string(message), viper.GetString("rancherui"), ctx)
+        
+                ws.WriteMessage(mt, []byte("调试已经开启"))
+            }
+        }
+
+        if string(message) == "stop" {
+            cancel()
+        }
+
+        channel := make(chan byte)
+    
+        go HeartBeating(ws, channel, 4)
+        //检测每次是否有数据传入
+        go GravelChannel([]byte(message), channel)
+    }
+
+    cancel()
+    fmt.Printf("string: %s\n", "取消了")
+
+}
+
+func asyncLogNormal(reader io.ReadCloser) error {
+	cache := ""
+	buf := make([]byte, 10240)
+	for {
+		num, err := reader.Read(buf)
+		if err != nil && err!=io.EOF{
+			return err
+        }
+        if num == 0 {
+            break
+        }
+		if num > 0 {
+			b := buf[:num]
+			s := strings.Split(string(b), "\n")
+			line := strings.Join(s[:len(s)-1], "\n") 
+            fmt.Printf("%s%s\n", cache, line)
+			cache = s[len(s)-1]
+		}
+    }
+
+	return nil
+}
+
+func RancherServerStart(adr string, dir string, ctx context.Context) {
+
+    command := "RANCHER='" + adr + "' yarn start"
+
+    fmt.Printf("string: %s\n", command)
+    cmd := exec.Command("/bin/bash", "-c", command)
+    cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+    cmd.Dir = dir
+
+    if err := cmd.Start(); err != nil {
+        log.Printf("Error starting command: %s......", err.Error())
+    }
+
+    for {
+        time.Sleep(1 * time.Second)
+        select {
+            case <-ctx.Done():
+                syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) 
+                fmt.Printf("string: %s\n", "done")
+                return
+            default:
+                fmt.Printf("string: %s\n", "runing")
+        }
+    }
+    
+}
+
+
+func GravelChannel(bytes []byte, mess chan byte) {
+    for _, v := range bytes{
+        mess <- v
+    }
+    close(mess)
+}
+
+func HeartBeating(conn *websocket.Conn, bytes chan byte, timeout int) {
+    select {
+    case <- bytes:
+        conn.SetReadDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+        break
+ 
+        case <- time.After(5 * time.Second):
+            conn.Close()
+    }
 }
