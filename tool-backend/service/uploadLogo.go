@@ -709,6 +709,8 @@ func StartDebugger(c *gin.Context) {
             cancel()
         }
 
+        ws.WriteMessage(mt, []byte("running"))
+
         channel := make(chan byte)
     
         go HeartBeating(ws, channel, 6)
