@@ -688,8 +688,6 @@ func StartDebugger(c *gin.Context) {
 		if err != nil {
 			break
         }
-        
-        fmt.Printf("string: %s\n", string(message))
 
 		if string(message) != "stop" && string(message) != "heartbeat" {
 
@@ -713,7 +711,7 @@ func StartDebugger(c *gin.Context) {
 
         channel := make(chan byte)
     
-        go HeartBeating(ws, channel, 4)
+        go HeartBeating(ws, channel, 6)
         //检测每次是否有数据传入
         go GravelChannel([]byte(message), channel)
     }
