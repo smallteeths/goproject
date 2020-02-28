@@ -713,7 +713,7 @@ func StartDebugger(c *gin.Context) {
 
         channel := make(chan byte)
     
-        go HeartBeating(ws, channel, 6)
+        go HeartBeating(ws, channel, 10)
         //检测每次是否有数据传入
         go GravelChannel([]byte(message), channel)
     }
@@ -764,10 +764,9 @@ func RancherServerStart(adr string, dir string, ctx context.Context) {
         select {
             case <-ctx.Done():
                 syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) 
-                fmt.Printf("string: %s\n", "done")
+                fmt.Printf("string: %s\n", "stop done")
                 return
             default:
-                fmt.Printf("string: %s\n", "runing")
         }
     }
     
