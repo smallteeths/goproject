@@ -690,14 +690,26 @@ func StartDebugger(c *gin.Context) {
         }
 
 		if string(message) != "stop" && string(message) != "heartbeat" {
+            info, errcmd := ioutil.ReadFile(viper.GetString("proxyfileaddr"))
+
+            if errcmd != nil {
+                fmt.Println(errcmd)
+            }
+            
+            out := []byte(info)
 
             if len(dir) == 0 && len(dir2) == 0 {
                 ws.WriteMessage(mt, []byte("文件未上传"))
             } else if len(dir) != 0 {
+
+                ioutil.WriteFile(viper.GetString("pandariaproxyfileaddr"), out, 0655)
+
                 go RancherServerStart(string(message), viper.GetString("pandariaui"), ctx)
 
                 ws.WriteMessage(mt, []byte("调试已经开启"))
             } else if len(dir2) != 0 {
+
+                ioutil.WriteFile(viper.GetString("osproxyfileaddr"), out, 0655)
 
                 go RancherServerStart(string(message), viper.GetString("rancherui"), ctx)
         

@@ -13,6 +13,7 @@ footerfileaddr: static/rancherfile/footer
 osfooterfileaddr: static/rancherfile/osfooter
 themefileaddr: static/rancherfile/_variables
 loginfileaddr: static/rancherfile/loginfile
+proxyfileaddr: static/rancherfile/proxy
 savefileaddr: static/variable
 pandariaui: rancherui/pandaria-ui
 rancherui: rancherui/ui
@@ -27,3 +28,5 @@ buildfile: rancherui/pandaria-ui/scripts/build-static
 osbuildfile: rancherui/ui/scripts/build-static
 installfile: rancherui/pandaria-ui/scripts/update-dependencies
 osinstallfile: rancherui/ui/scripts/update-dependencies
+pandariaproxyfileaddr: rancherui/pandaria-ui/server/proxies/api.js
+osproxyfileaddr: rancherui/ui/server/proxies/api.js
