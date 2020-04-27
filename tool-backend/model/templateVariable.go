@@ -3,9 +3,12 @@ package model
 type TemplateVariable struct {
 	FileName 	string `json:"file_name" form:"file_name"`
 	LoginBgFileName 	string `json:"loginbg_file_name" form:"loginbg_file_name"`
+	IconFileName 	string `json:"icon_file_name" form:"icon_file_name"`
 	LinkData 	string `json:"link_data" form:"link_data"`
 	VariablesData string `json:"variables_data" form:"variables_data"`
 	LoginrecordData string `json:"loginrecord_data" form:"loginrecord_data"`
+	Title string `json:"title" form:"title"`
+	ToggleLink string `json:"toggleLink" form:"toggleLink"`
 }
 
 type LinkData struct {
@@ -16,6 +19,7 @@ type LinkData struct {
 type LoginrecordData struct {
 	LinkName 	string `json:"name" form:"name"`
 	LinkAddr 	string `json:"value" form:"value"`
+	Greeting    string `json:"greeting" form:"greeting"`
 }
 
 type ThemeColor struct {

@@ -9,10 +9,15 @@ logoaddr: rancherui/pandaria-ui/public/assets/images/logos/rancher-logo-cow-whit
 oslogoaddr: rancherui/ui/public/assets/images/logos/main.svg
 loginbgaddr: rancherui/pandaria-ui/public/assets/images/login-cityscape.svg
 osloginbgaddr: rancherui/ui/public/assets/images/login-cityscape.svg
+loginiconaddr: rancherui/pandaria-ui/public/assets/images/logos/favicon.ico
+osloginiconaddr: rancherui/ui/public/assets/images/logos/favicon.ico
 footerfileaddr: static/rancherfile/footer
 osfooterfileaddr: static/rancherfile/osfooter
+footercoverfileaddr: static/rancherfile/footerCover
+osfootercoverfileaddr: static/rancherfile/osfooterCover
 themefileaddr: static/rancherfile/_variables
 loginfileaddr: static/rancherfile/loginfile
+apifileaddr: static/rancherfile/apifile
 proxyfileaddr: static/rancherfile/proxy
 savefileaddr: static/variable
 pandariaui: rancherui/pandaria-ui
@@ -21,6 +26,8 @@ rancherfooteraddr: rancherui/pandaria-ui/app/components/page-footer-cn/template.
 osrancherfooteraddr: rancherui/ui/app/components/page-footer/template.hbs
 rancherloginfileaddr: rancherui/pandaria-ui/lib/login/addon/login/template.hbs
 osrancherloginfileaddr: rancherui/ui/lib/login/addon/login/template.hbs
+rancherapiaddr: rancherui/pandaria-ui/app/application/route.js
+osrancherapiaddr: rancherui/ui/app/application/route.js
 rancherthemeaddr: rancherui/pandaria-ui/app/styles/abstracts/_variables.scss
 osrancherthemeaddr: rancherui/ui/app/styles/abstracts/_variables.scss
 staticbuildfile: static/rancherfile/build-static

@@ -32,7 +32,12 @@ var upGrader = websocket.Upgrader{
 }
 
 type  LoginLinkData struct {
-	Link 	string `json:"link" form:"link"`
+    Link 	string `json:"link" form:"link"`
+    Greeting string `json:"greeting" form:"greeting"`
+}
+
+type  TitleData struct {
+	Title 	string `json:"title" form:"title"`
 }
 
 func UploadHandler(c *gin.Context) {
@@ -63,6 +68,39 @@ func UploadHandler(c *gin.Context) {
     
     u := model.TemplateVariable{
 		FileName: newFileName,
+    }
+
+	SendResponse(c, nil, u)
+}
+
+func UploadIconHandler(c *gin.Context) {
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+	   SendResponse(c, errno.ErrBind, nil)
+	   return
+	}
+	fileName := header.Filename
+	fmt.Println(file, err, fileName)
+	//创建文件
+	u1 := uuid.Must(uuid.NewV4())
+	fmt.Printf("UUIDv4: %s\n", u1)
+  
+	newFileName := "favicon" + u1.String() + ".ico"
+	out, err := os.Create("static/uploadfile/" + newFileName)
+	//注意此处的 static/uploadfile/ 不是/static/uploadfile/
+	if err != nil {
+        log.Fatal(err)
+        SendResponse(c, errno.ErrBind, nil)
+	}
+	defer out.Close()
+	_, err = io.Copy(out, file)
+	if err != nil {
+        log.Fatal(err)
+        SendResponse(c, errno.ErrBind, nil)
+    }
+    
+    u := model.TemplateVariable{
+		IconFileName: newFileName,
     }
 
 	SendResponse(c, nil, u)
@@ -128,14 +166,34 @@ func Save(c *gin.Context) {
 	u := model.TemplateVariable{
         FileName: r.FileName,
         LoginBgFileName: r.LoginBgFileName,
+        IconFileName: r.IconFileName,
         LinkData: r.LinkData,
         VariablesData: r.VariablesData,
         LoginrecordData: r.LoginrecordData,
+        Title: r.Title,
+        ToggleLink: r.ToggleLink,
     }
 
-    if r.LinkData != "" {
-        ChangeFooterFile(c, r.LinkData, version)
+    if (r.LinkData != "" || r.ToggleLink == "1") && r.ToggleLink != "3" {
+        ChangeFooterFile(c, r.LinkData, version, r.ToggleLink)
         info, err := ioutil.ReadFile("static/rancherfile/footer.hbs")
+
+        if err != nil {
+            fmt.Println(err)
+            SendResponse(c, errno.ErrBind, nil)
+            return
+        }
+        
+        out := []byte(info)
+        if version == "rancherui" {
+            ioutil.WriteFile(viper.GetString("osrancherfooteraddr"), out, 0655)
+        } else {
+            ioutil.WriteFile(viper.GetString("rancherfooteraddr"), out, 0655)
+        }
+    }
+
+    if r.ToggleLink == "3" {
+        info, err := ioutil.ReadFile("static/rancherfile/footerDelete")
 
         if err != nil {
             fmt.Println(err)
@@ -157,6 +215,10 @@ func Save(c *gin.Context) {
 
     if r.LoginrecordData != "" {
         ChangeLoginRecord(c, r.LoginrecordData, version)
+    }
+
+    if r.Title != "" {
+        ChangeTitle(c, r.Title, version)
     }
 
     if r.FileName != "" {
@@ -194,6 +256,24 @@ func Save(c *gin.Context) {
         }
     }
 
+    if r.IconFileName != "" {
+        fmt.Println(r.IconFileName)
+        info, err := ioutil.ReadFile("static/uploadfile/" + r.IconFileName)
+
+        if err != nil {
+            fmt.Println(err)
+            SendResponse(c, errno.ErrBind, nil)
+            return
+        }
+        
+        out := []byte(info)
+        if version == "rancherui" {
+            ioutil.WriteFile(viper.GetString("osloginiconaddr"), out, 0655)
+        } else {
+            ioutil.WriteFile(viper.GetString("loginiconaddr"), out, 0655)
+        }
+    }
+
     file, err := os.Create(viper.GetString("savefileaddr"))
     if err != nil {
         fmt.Println(err)
@@ -210,7 +290,7 @@ func Save(c *gin.Context) {
     SendResponse(c, nil, nil)
 }
  
-func ChangeFooterFile(c *gin.Context, list string, version string) {
+func ChangeFooterFile(c *gin.Context, list string, version string, toggleLink string) {
 
     fmt.Printf("string: %s\n", list)
     
@@ -253,9 +333,18 @@ func ChangeFooterFile(c *gin.Context, list string, version string) {
     var staticFooterName string
 
     if version == "rancherui" {
-        staticFooterName = viper.GetString("osfooterfileaddr")
+        if toggleLink == "1" {
+            staticFooterName = viper.GetString("osfootercoverfileaddr")
+        } else {
+            staticFooterName = viper.GetString("osfooterfileaddr")
+        }
+        
     } else {
-        staticFooterName = viper.GetString("footerfileaddr")
+        if toggleLink == "1" {
+            staticFooterName = viper.GetString("footercoverfileaddr")
+        } else {
+            staticFooterName = viper.GetString("footerfileaddr")
+        }
     }
 
 	in, err := os.Open(staticFooterName)
@@ -385,8 +474,20 @@ func ChangeLoginRecord(c *gin.Context, LoginrecordString string, version string)
     
     out := []byte(info)
 
+    linkString := ""
+    greetingString := "{{t \"loginPage.greeting\" appName=settings.appName htmlSafe=true }}"
+
+    if loginrecordData.LinkName != "" {
+        linkString = buf.String()
+    }
+
+    if loginrecordData.Greeting != "" {
+        greetingString = loginrecordData.Greeting
+    }
+
     link := LoginLinkData{
-        Link: buf.String(),
+        Link: linkString,
+        Greeting: greetingString,
     }
 
     tRead, err := template.New("test").Delims("[[", "]]").Parse(string(out))
@@ -413,6 +514,52 @@ func ChangeLoginRecord(c *gin.Context, LoginrecordString string, version string)
         name = viper.GetString("osrancherloginfileaddr")
     } else {
         name = viper.GetString("rancherloginfileaddr")
+    }
+
+    ioutil.WriteFile(name, []byte(bufRead.String()), 0655)
+
+}
+
+func ChangeTitle(c *gin.Context, titleString string, version string) {
+
+    info, err := ioutil.ReadFile(viper.GetString("apifileaddr"))
+
+    if err != nil {
+        fmt.Println(err)
+        SendResponse(c, errno.ErrBind, nil)
+        return
+    }
+    
+    out := []byte(info)
+
+    title := TitleData{
+        Title: titleString,
+    }
+
+    tRead, err := template.New("test").Delims("[[", "]]").Parse(string(out))
+
+    if err != nil {
+        fmt.Println("Fatal error ", err.Error())
+        SendResponse(c, errno.ErrBind, nil)
+        return
+    }
+
+    bufRead := new(bytes.Buffer)
+
+    err = tRead.Execute(bufRead, title)
+
+    if err != nil {
+        fmt.Println("Fatal error ", err.Error())
+        SendResponse(c, errno.ErrBind, nil)
+        return
+    }
+
+    var name string
+
+    if version == "rancherui" {
+        name = viper.GetString("osrancherapiaddr")
+    } else {
+        name = viper.GetString("rancherapiaddr")
     }
 
     ioutil.WriteFile(name, []byte(bufRead.String()), 0655)

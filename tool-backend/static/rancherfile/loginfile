@@ -1,10 +1,6 @@
 <div class="login">
   <h1>
-    {{t
-      "loginPage.greeting"
-      appName=settings.appName
-      htmlSafe=true
-    }}
+    [[.Greeting]]
     <div class="logo"></div>
   </h1>
   <section class="pb-0">
