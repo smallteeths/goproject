@@ -223,9 +223,16 @@ func Save(c *gin.Context) {
 
     if r.FileName != "" {
         info, err := ioutil.ReadFile("static/uploadfile/" + r.FileName)
+        fileinfo, fileerr := ioutil.ReadFile("static/rancherfile/navfile")
 
         if err != nil {
             fmt.Println(err)
+            SendResponse(c, errno.ErrBind, nil)
+            return
+        }
+
+        if fileerr != nil {
+            fmt.Println(fileerr)
             SendResponse(c, errno.ErrBind, nil)
             return
         }
@@ -234,7 +241,9 @@ func Save(c *gin.Context) {
         if version == "rancherui" {
             ioutil.WriteFile(viper.GetString("oslogoaddr"), out, 0655)
         } else {
+            fileout := []byte(fileinfo)
             ioutil.WriteFile(viper.GetString("logoaddr"), out, 0655)
+            ioutil.WriteFile(viper.GetString("rancherlogofileaddr"), fileout, 0655)
         }
         
     }
@@ -306,7 +315,13 @@ func ChangeFooterFile(c *gin.Context, list string, version string, toggleLink st
             LinkAddr: item.LinkAddr,
         }
 
-        s := `<a style="color: #fff" role="button" class="btn btn-sm bg-transparent" target="blank" rel="noreferrer noopener" href="{{.LinkAddr}}">{{.LinkName}}</a>`
+        s := ""
+
+        if version == "rancherui" {
+            s = `<a style="color: #3497da" role="button" class="btn btn-sm bg-transparent" target="blank" rel="noreferrer noopener" href="{{.LinkAddr}}">{{.LinkName}}</a>`
+        } else {
+            s = `<a style="color: #fff" role="button" class="btn btn-sm bg-transparent" target="blank" rel="noreferrer noopener" href="{{.LinkAddr}}">{{.LinkName}}</a>`
+        }
 
         t, err := template.New("test").Parse(s)
 

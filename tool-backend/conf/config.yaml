@@ -25,6 +25,7 @@ rancherui: rancherui/ui
 rancherfooteraddr: rancherui/pandaria-ui/app/components/page-footer-cn/template.hbs
 osrancherfooteraddr: rancherui/ui/app/components/page-footer/template.hbs
 rancherloginfileaddr: rancherui/pandaria-ui/lib/login/addon/login/template.hbs
+rancherlogofileaddr: rancherui/pandaria-ui/app/components/page-header-left-top/template.hbs
 osrancherloginfileaddr: rancherui/ui/lib/login/addon/login/template.hbs
 rancherapiaddr: rancherui/pandaria-ui/app/application/route.js
 osrancherapiaddr: rancherui/ui/app/application/route.js
