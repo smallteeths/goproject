@@ -189,6 +189,7 @@ func Save(c *gin.Context) {
             ioutil.WriteFile(viper.GetString("osrancherfooteraddr"), out, 0655)
         } else {
             ioutil.WriteFile(viper.GetString("rancherfooteraddr"), out, 0655)
+            ioutil.WriteFile(viper.GetString("rancheropensourcefooteraddr"), out, 0655)
         }
     }
 
@@ -206,6 +207,7 @@ func Save(c *gin.Context) {
             ioutil.WriteFile(viper.GetString("osrancherfooteraddr"), out, 0655)
         } else {
             ioutil.WriteFile(viper.GetString("rancherfooteraddr"), out, 0655)
+            ioutil.WriteFile(viper.GetString("rancheropensourcefooteraddr"), out, 0655)
         }
     }
 
@@ -243,6 +245,7 @@ func Save(c *gin.Context) {
         } else {
             fileout := []byte(fileinfo)
             ioutil.WriteFile(viper.GetString("logoaddr"), out, 0655)
+            ioutil.WriteFile(viper.GetString("logoopensourceaddr"), out, 0655)
             ioutil.WriteFile(viper.GetString("rancherlogofileaddr"), fileout, 0655)
         }
         
